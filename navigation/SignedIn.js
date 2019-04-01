@@ -4,6 +4,8 @@ import {
   createBottomTabNavigator
 } from 'react-navigation';
 
+import OrdersScreen from '../screens/OrdersScreen';
+
 //**************
 //import screens
 //**************

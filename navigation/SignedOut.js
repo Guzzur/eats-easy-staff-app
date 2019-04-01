@@ -48,7 +48,7 @@ OrderStack.navigationOptions = {
   };
 
   export default createBottomTabNavigator({
-    SignedInStack,
+    SignInStack,
     SignUpStack
   });
   
