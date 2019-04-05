@@ -47,6 +47,18 @@ const ManagementStack = createStackNavigator(
   }
 );
 
+const UserProfileStack = createStackNavigator(
+  {
+    Profile: UserProfileScreen
+  },
+  {
+    headerMode: 'none',
+    navigationOptions: {
+      headerVisible: false
+    }
+  }
+);
+
 // Navigations
 
 OrderStack.navigationOptions = {
@@ -70,9 +82,15 @@ MenuStack.navigationOptions = {
   )
 };
 
+UserProfileStack.navigationOptions = {
+  tabBarLabel: 'Profile',
+  tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name={'user'} />
+};
+
 
 export default createBottomTabNavigator({
   OrdersStack,
   ServiceCallsStack,
-  ManagementStack
+  ManagementStack,
+  UserProfileStack
 });
