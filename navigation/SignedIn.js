@@ -35,9 +35,9 @@ const OrdersStack = createStackNavigator(
   }
 );
 
-const ManagementStack = createStackNavigator(
+const RestaurantMenuStack = createStackNavigator(
   {
-    Management: ManagementScreen
+    RestaurantMenu: RestaurantMenuScreen
   },
   {
     headerMode: 'none',
@@ -75,8 +75,8 @@ CallServiceStack.navigationOptions = {
   )
 };
 
-MenuStack.navigationOptions = {
-  tabBarLabel: 'Management',
+RestaurantMenuStack.navigationOptions = {
+  tabBarLabel: 'RestaurantMenu',
   tabBarIcon: ({ focused }) => (
     <TabBarIcon focused={focused} name={'restaurant'} />
   )
@@ -91,6 +91,6 @@ UserProfileStack.navigationOptions = {
 export default createBottomTabNavigator({
   OrdersStack,
   ServiceCallsStack,
-  ManagementStack,
+  RestaurantMenuStack,
   UserProfileStack
 });

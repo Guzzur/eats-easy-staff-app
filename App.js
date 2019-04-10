@@ -11,17 +11,8 @@ export default class App extends React.Component {
     this.state = {
       isLoadingComplete: false
     };
-    this.storageManager = new StorageManager();
   }
 
-  async componentWillMount() {
-    let DEBUG = false;
-    if (DEBUG) {
-      console.log(await this.storageManager._retrieveRestaurantData());
-      console.log(await this.storageManager._retrieveAllOrdersData());
-      console.log(await this.storageManager._retrieveAllOrderStatuses());
-    }
-  }
 
   render() {
     if (!this.state.isLoadingComplete && !this.props.skipLoadingScreen) {

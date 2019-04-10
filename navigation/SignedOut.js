@@ -18,18 +18,6 @@ import {
     }
     );
 
-    const SignUpStack = createStackNavigator(
-    {
-       SignUp: SignUpScreen
-    },
-    {
-      headerMode: 'none',
-        navigationOptions: {
-            headerVisible: false
-        }
-    }
-    );
-
 
 // Navigations
 
@@ -39,16 +27,8 @@ OrderStack.navigationOptions = {
       <TabBarIcon focused={focused} name={'shopping-cart'} />
     )
   };
-  
-  CallServiceStack.navigationOptions = {
-    tabBarLabel: 'SignUp',
-    tabBarIcon: ({ focused }) => (
-      <TabBarIcon focused={focused} name={'room-service'} />
-    )
-  };
 
   export default createBottomTabNavigator({
-    SignInStack,
-    SignUpStack
+    SignInStack
   });
   
