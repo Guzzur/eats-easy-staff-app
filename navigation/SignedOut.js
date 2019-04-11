@@ -4,7 +4,7 @@ import { createStackNavigator, createBottomTabNavigator } from 'react-navigation
 // stacks
 const SignInStack = createStackNavigator(
   {
-    SignUp: SignInScreen
+    SignIn: SignInScreen
   },
   {
     headerMode: 'none',
