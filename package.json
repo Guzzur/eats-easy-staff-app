@@ -21,7 +21,8 @@
     "react-navigation": "^3.7.1"
   },
   "devDependencies": {
-    "babel-preset-expo": "^5.0.0"
+    "babel-preset-expo": "^5.0.0",
+    "jest-expo": "^32.0.0"
   },
   "private": true
 }

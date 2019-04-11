@@ -3,9 +3,9 @@ import { Text, View } from 'react-native';
 
 import { Col, Row, Grid } from 'react-native-easy-grid';
 import { withNavigation } from 'react-navigation';
-import { commonStyles } from '../../styles';
+import { commonStyles } from '../styles';
 
-import LoadingCircle from '../../components/LoadingCircle';
+import LoadingCircle from '../components/LoadingCircle';
 
 class OrdersScreen extends Component {
   constructor() {
