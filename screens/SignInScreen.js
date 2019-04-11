@@ -1,13 +1,10 @@
 import React from 'react';
-import { ScrollView, TouchableNativeFeedback, Image, Text, View } from 'react-native';
-import { Button, Icon } from 'react-native-elements';
-import { Col, Row, Grid } from 'react-native-easy-grid';
-import LoadingCircle from '../components/LoadingCircle';
-import DishStatusStepper from '../components/DishStatusStepper';
+import { View } from 'react-native';
+import { Button } from 'react-native-elements';
 import SignInDialog from '../components/SignInDialog';
 import SignUpDialog from '../components/SignUpDialog';
 import StorageManager from '../services/storage_manager';
-import { commonStyles, dishStatusStepperStyles } from '../styles';
+import { commonStyles } from '../styles';
 import Colors from '../constants/Colors';
 
 export default class SignInScreen extends React.Component {
@@ -26,7 +23,8 @@ export default class SignInScreen extends React.Component {
   render() {
     return (
       <View style={[ commonStyles.container, commonStyles.centered, commonStyles.justifyCenter ]}>
-        {<Button
+        {
+          <Button
             title={'Sign in'.toUpperCase()}
             onPress={() => {
               this.setState({ signInVisible: true });
@@ -39,7 +37,8 @@ export default class SignInScreen extends React.Component {
             }}
             rounded
             backgroundColor={Colors.tintColor}
-        />}
+          />
+        }
         <SignInDialog
           visible={this.state.signInVisible}
           cancel={() => this.setState({ signInVisible: false })}

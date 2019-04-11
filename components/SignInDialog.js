@@ -90,16 +90,16 @@ export default class SignInDialog extends React.Component {
               onPress={() =>
                 this.signInHandler({
                   phone: this.state.phoneValue,
-                  password: this.state.passwordValue,
+                  password: this.state.passwordValue
                 })
-               /* this.props.navigation.navigate({
+              /* this.props.navigation.navigate({
                   routeName: 'SignedIn',
                   action: this.props.navigation.navigate({
                     routeName: 'OrdersStack',
                     //no params?
                   })
                 }) */
-              } 
+              }
             />
           </DialogFooter>
         }
