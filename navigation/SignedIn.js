@@ -1,6 +1,10 @@
 import React from 'react';
 import { createStackNavigator, createBottomTabNavigator } from 'react-navigation';
 
+import TabBarIcon from '../components/TabBarIcon';
+import ServiceCallsScreen from '../screens/ServiceCallsScreen';
+// import RestaurantMenuScreen from '../screens/RestauranMenuScreen';
+import UserProfileScreen from '../screens/UserProfileScreen';
 import OrdersScreen from '../screens/OrdersScreen';
 
 //**************
@@ -32,17 +36,17 @@ const OrdersStack = createStackNavigator(
   }
 );
 
-const RestaurantMenuStack = createStackNavigator(
-  {
-    RestaurantMenu: RestaurantMenuScreen
-  },
-  {
-    headerMode: 'none',
-    navigationOptions: {
-      headerVisible: false
-    }
-  }
-);
+// const RestaurantMenuStack = createStackNavigator(
+//   {
+//     RestaurantMenu: RestaurantMenuScreen
+//   },
+//   {
+//     headerMode: 'none',
+//     navigationOptions: {
+//       headerVisible: false
+//     }
+//   }
+// );
 
 const UserProfileStack = createStackNavigator(
   {
@@ -58,20 +62,20 @@ const UserProfileStack = createStackNavigator(
 
 // Navigations
 
-OrderStack.navigationOptions = {
+OrdersStack.navigationOptions = {
   tabBarLabel: 'Orders',
   tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name={'shopping-cart'} />
 };
 
-CallServiceStack.navigationOptions = {
+ServiceCallsStack.navigationOptions = {
   tabBarLabel: 'ServiceCalls',
   tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name={'room-service'} />
 };
 
-RestaurantMenuStack.navigationOptions = {
-  tabBarLabel: 'RestaurantMenu',
-  tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name={'restaurant'} />
-};
+// RestaurantMenuStack.navigationOptions = {
+//   tabBarLabel: 'RestaurantMenu',
+//   tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name={'restaurant'} />
+// };
 
 UserProfileStack.navigationOptions = {
   tabBarLabel: 'Profile',
@@ -81,6 +85,6 @@ UserProfileStack.navigationOptions = {
 export default createBottomTabNavigator({
   OrdersStack,
   ServiceCallsStack,
-  RestaurantMenuStack,
+  // RestaurantMenuStack,
   UserProfileStack
 });
