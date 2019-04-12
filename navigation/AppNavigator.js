@@ -2,12 +2,11 @@ import React from 'react';
 import { createAppContainer, createSwitchNavigator } from 'react-navigation';
 import SignedIn from './SignedIn';
 import SignedOut from './SignedOut';
+import StorageManager from '../services/storage_manager';
 
 // async componentWillMount() {
-//   let user = await this.storageManager._retrieveUserData();
-//   await this.setState({
-//     user: user
-//   });
+let storageManager = new StorageManager();
+let user = storageManager._retrieveUserData();
 // }
 
 export default createAppContainer(
@@ -17,7 +16,7 @@ export default createAppContainer(
       SignedOut: SignedOut
     },
     {
-      initialRouteName: this.user ? 'SignedIn' : 'SignedOut'
+      initialRouteName: user ? 'SignedIn' : 'SignedOut'
     }
   )
 );

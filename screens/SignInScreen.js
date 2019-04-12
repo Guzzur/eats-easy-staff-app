@@ -16,7 +16,6 @@ export default class SignInScreen extends React.Component {
       signInVisible: false,
       signUpVisible: false
     };
-
     this.storageManager = new StorageManager();
   }
 

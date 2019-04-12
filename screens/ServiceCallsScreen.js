@@ -4,7 +4,11 @@ import { Col, Row, Grid } from 'react-native-easy-grid';
 import { withNavigation } from 'react-navigation';
 import { commonStyles } from '../styles';
 
+import StorageManager from '../services/storage_manager';
 import LoadingCircle from '../components/LoadingCircle';
+
+import { getApiRestIdbyEmployee } from '../network/getApiRestIdbyEmployee';
+import { getApiServiceCallsByRestId } from '../network/getApiServiceCallsByRestId';
 
 class ServiceCallsScreen extends Component {
   constructor() {
@@ -14,6 +18,7 @@ class ServiceCallsScreen extends Component {
       data: [],
       user: null
     };
+    this.storageManager = new StorageManager();
   }
 
   render() {
@@ -37,7 +42,7 @@ class ServiceCallsScreen extends Component {
         user: user
       });
       const restId = await getApiRestIdbyEmployee(this.state.user.userId);
-      const orders = await getApiServiceCallsbyRestId(restId);
+      const orders = await getApiServiceCallsByRestId(restId);
       this.setState({
         data: orders || [],
         status: 'loaded'
@@ -50,43 +55,43 @@ class ServiceCallsScreen extends Component {
       });
     }
   }
-}
 
-renderItem = (serviceCall, i) => {
-  return serviceCall ? (
-    <View
-      key={'call_' + i}
-      style={[ commonStyles.container, commonStyles.shadowSmall, { height: 100, marginBottom: 5 } ]}
-    >
-      <Row style={commonStyles.row}>
-        <Grid>
-          <Row style={commonStyles.rowList}>
-            <Col size={6} style={[ commonStyles.columnList, commonStyles.justifyCenter ]}>
-              <Text style={commonStyles.textMedium}>{serviceCall.tableId}</Text>
-              <Text style={commonStyles.textSmall}>{serviceCall.reason}</Text>
-            </Col>
-            <Col size={1} style={[ commonStyles.columnList, commonStyles.justifyCenter ]}>
-              <TouchableNativeFeedback
-                onPress={async () => {
-                  // update callWaiter and CallResolve through network, thhen re-render
-                }}
-                style={[
-                  { width: 40, height: 40, padding: 0, margin: 0 },
-                  commonStyles.centered,
-                  commonStyles.justifyCenter
-                ]}
-              >
-                <Icon name="bell" size={30} />
-              </TouchableNativeFeedback>
-            </Col>
-          </Row>
-        </Grid>
-      </Row>
-    </View>
-  ) : (
-    <View key={'no_call_' + i} />
-  );
-};
+  renderItem = (serviceCall, i) => {
+    return serviceCall ? (
+      <View
+        key={'call_' + i}
+        style={[ commonStyles.container, commonStyles.shadowSmall, { height: 100, marginBottom: 5 } ]}
+      >
+        <Row style={commonStyles.row}>
+          <Grid>
+            <Row style={commonStyles.rowList}>
+              <Col size={6} style={[ commonStyles.columnList, commonStyles.justifyCenter ]}>
+                <Text style={commonStyles.textMedium}>{serviceCall.tableId}</Text>
+                <Text style={commonStyles.textSmall}>{serviceCall.reason}</Text>
+              </Col>
+              <Col size={1} style={[ commonStyles.columnList, commonStyles.justifyCenter ]}>
+                <TouchableNativeFeedback
+                  onPress={async () => {
+                    // update callWaiter and CallResolve through network, thhen re-render
+                  }}
+                  style={[
+                    { width: 40, height: 40, padding: 0, margin: 0 },
+                    commonStyles.centered,
+                    commonStyles.justifyCenter
+                  ]}
+                >
+                  <Icon name="bell" size={30} />
+                </TouchableNativeFeedback>
+              </Col>
+            </Row>
+          </Grid>
+        </Row>
+      </View>
+    ) : (
+      <View key={'no_call_' + i} />
+    );
+  };
+}
 
 //do we need this?
 export default withNavigation(ServiceCallsScreen);

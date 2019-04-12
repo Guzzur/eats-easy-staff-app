@@ -11,6 +11,21 @@ export default class App extends React.Component {
     this.state = {
       isLoadingComplete: false
     };
+    this.storageManager = new StorageManager();
+  }
+
+  async componentWillMount() {
+    let DEBUG = true;
+    if (DEBUG) {
+      // await this.storageManager._removeAllData();
+      console.log('_retrieveUserData', await this.storageManager._retrieveUserData());
+      console.log('_retrieveRestaurantData', await this.storageManager._retrieveRestaurantData());
+      console.log('_retrieveAllOrdersData', await this.storageManager._retrieveAllOrdersData());
+      console.log('_retrieveAllOrderStatuses', await this.storageManager._retrieveAllOrderStatuses());
+      console.log('_retrieveAllTablesData', await this.storageManager._retrieveAllTablesData());
+      console.log('_retrieveTableData', await this.storageManager._retrieveTableData());
+      console.log('_retrievePaymentMethodData', await this.storageManager._retrievePaymentMethodData());
+    }
   }
 
   render() {
