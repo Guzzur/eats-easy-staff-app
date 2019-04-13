@@ -68,7 +68,7 @@ OrdersStack.navigationOptions = {
 };
 
 ServiceCallsStack.navigationOptions = {
-  tabBarLabel: 'ServiceCalls',
+  tabBarLabel: 'Service calls',
   tabBarIcon: ({ focused }) => <TabBarIcon focused={focused} name={'question'} />
 };
 

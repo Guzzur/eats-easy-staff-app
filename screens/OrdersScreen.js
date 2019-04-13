@@ -71,49 +71,48 @@ class OrdersScreen extends Component {
         key={'order_' + i}
         style={[ commonStyles.container, commonStyles.shadowSmall, { height: 100, marginBottom: 5 } ]}
       >
-        <Row style={commonStyles.row}>
-          <Grid>
-            <Row style={commonStyles.rowList}>
-              <Col size={6} style={[ commonStyles.columnList, commonStyles.justifyCenter ]}>
-                <Text style={commonStyles.textMedium}>Order ID: {order.orderId}</Text>
-                <Text style={commonStyles.textSmall}>Table ID: {order.tableId}</Text>
-                <Text style={commonStyles.textSmall}>Order Status: {order.orderStatus}</Text>
-              </Col>
-              <Col size={1} style={[ commonStyles.columnList, commonStyles.justifyCenter ]}>
-                <View
+        <Grid>
+          <Row style={commonStyles.rowList}>
+            <Col size={6} style={[ commonStyles.columnList, commonStyles.justifyCenter ]}>
+              <Text style={commonStyles.textBig}>Order ID: {order.orderId}</Text>
+              <Text style={commonStyles.textSmall}>Time received: {order.timeReceived}</Text>
+              <Text style={commonStyles.textSmall}>Table ID: {order.tableId}</Text>
+              <Text style={commonStyles.textSmall}>Order Status: {order.orderStatus}</Text>
+            </Col>
+            <Col size={1} style={[ commonStyles.columnList, commonStyles.justifyCenter ]}>
+              <View
+                style={[
+                  {
+                    backgroundColor: Colors.tintColor,
+                    width: 60,
+                    height: 60,
+                    borderRadius: 10
+                  },
+                  commonStyles.centered,
+                  commonStyles.justifyCenter
+                ]}
+              >
+                <TouchableNativeFeedback
+                  onPress={async () => {
+                    // update orderstatus through network, then re-render
+                  }}
                   style={[
                     {
-                      backgroundColor: Colors.tintColor,
                       width: 60,
                       height: 60,
-                      borderRadius: 10
+                      padding: 10,
+                      margin: 0
                     },
                     commonStyles.centered,
                     commonStyles.justifyCenter
                   ]}
                 >
-                  <TouchableNativeFeedback
-                    onPress={async () => {
-                      // update orderstatus through network, then re-render
-                    }}
-                    style={[
-                      {
-                        width: 60,
-                        height: 60,
-                        padding: 10,
-                        margin: 0
-                      },
-                      commonStyles.centered,
-                      commonStyles.justifyCenter
-                    ]}
-                  >
-                    <Icon name="bell" type="font-awesome" size={30} color={Colors.white} />
-                  </TouchableNativeFeedback>
-                </View>
-              </Col>
-            </Row>
-          </Grid>
-        </Row>
+                  <Icon name="bell" type="font-awesome" size={30} color={Colors.white} />
+                </TouchableNativeFeedback>
+              </View>
+            </Col>
+          </Row>
+        </Grid>
       </View>
     ) : (
       <View key={'no_order_' + i} />
