@@ -1,7 +1,8 @@
 import React from 'react';
-import { Platform, StatusBar, StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 import { AppLoading, Asset, Font, Icon } from 'expo';
-import AppNavigator from './navigation/AppNavigator';
+import SignedInNavigator from './navigation/SignedInNavigator';
+import SignedOutNavigator from './navigation/SignedOutNavigator';
 import { commonStyles } from './styles';
 import StorageManager from './services/storage_manager';
 
@@ -9,7 +10,8 @@ export default class App extends React.Component {
   constructor() {
     super();
     this.state = {
-      isLoadingComplete: false
+      isLoadingComplete: false,
+      user: null
     };
     this.storageManager = new StorageManager();
   }
@@ -26,6 +28,7 @@ export default class App extends React.Component {
       console.log('_retrieveTableData', await this.storageManager._retrieveTableData());
       console.log('_retrievePaymentMethodData', await this.storageManager._retrievePaymentMethodData());
     }
+    this.setState({ user: await this.storageManager._retrieveUserData() });
   }
 
   render() {
@@ -39,9 +42,7 @@ export default class App extends React.Component {
       );
     } else {
       return (
-        <View style={commonStyles.container}>
-          <AppNavigator />
-        </View>
+        <View style={commonStyles.container}>{this.state.user ? <SignedInNavigator /> : <SignedOutNavigator />}</View>
       );
     }
   }

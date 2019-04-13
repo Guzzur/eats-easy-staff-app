@@ -62,7 +62,6 @@ export default class SignInDialog extends React.Component {
       };
 
       let res = await postApiUserSignIn(userSignIn);
-      console.log(res);
 
       if (res === -99999) return;
 

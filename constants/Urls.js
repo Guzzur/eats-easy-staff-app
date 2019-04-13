@@ -1,5 +1,6 @@
 export default {
   apiRootUrl: 'https://eats-easy-spring.herokuapp.com/api/',
+  // apiRootUrl: 'http://localhost:8080/api/',
   apiVersionUrl: 'whoami',
   apiUsers: 'users',
   apiSignIn: 'users/signin',
@@ -10,10 +11,10 @@ export default {
     return 'restaurants/' + id + '/orders';
   },
   apiServiceCallsbyRestId: (id) => {
-    return 'restaurants/' + id + '/servicecalls';
+    return 'restaurants/' + id + '/serviceCalls';
   },
-  apiRestIdbyEmployee: (id) => {
-    return 'employees/' + id;
+  apiRestIdbyEmployee: (userId) => {
+    return 'restaurants/' + userId + '/employee';
   }
 };
 

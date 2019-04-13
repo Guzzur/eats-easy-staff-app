@@ -3,7 +3,6 @@ const url = urls.apiRootUrl + urls.apiUsers;
 
 export const putApiUser = async (data) => {
   try {
-    console.log(data);
     const res = await fetch(url + '/' + data.userId, {
       method: 'PUT',
       body: JSON.stringify(data),
@@ -13,7 +12,6 @@ export const putApiUser = async (data) => {
       }
     });
     const retJson = await res.json();
-    console.log('putApiUser', retJson);
     const { userId } = retJson;
     return userId;
   } catch (err) {

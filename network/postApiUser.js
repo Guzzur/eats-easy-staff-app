@@ -23,7 +23,6 @@ export const postApiUser = async (data) => {
 
 export const postApiUserSignIn = async (data) => {
   try {
-    console.log(JSON.stringify(data));
     const res = await fetch(urlSignIn, {
       method: 'POST',
       body: JSON.stringify(data),
@@ -33,7 +32,6 @@ export const postApiUserSignIn = async (data) => {
       }
     });
     const userId = await res.json();
-    console.log(userId);
     return userId;
   } catch (err) {
     console.error(err);
@@ -43,7 +41,6 @@ export const postApiUserSignIn = async (data) => {
 
 export const postApiUserSignUp = async (data) => {
   try {
-    console.log(JSON.stringify(data));
     const res = await fetch(urlSignUp, {
       method: 'POST',
       body: JSON.stringify(data),
@@ -53,7 +50,6 @@ export const postApiUserSignUp = async (data) => {
       }
     });
     const userId = await res.json();
-    console.log(userId);
     return userId;
   } catch (err) {
     console.error(err);

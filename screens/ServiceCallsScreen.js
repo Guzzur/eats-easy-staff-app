@@ -1,11 +1,14 @@
 import React, { Component } from 'react';
-import { Text, View } from 'react-native';
+import { Text, View, ScrollView, TouchableNativeFeedback } from 'react-native';
+import { Icon } from 'react-native-elements';
+
 import { Col, Row, Grid } from 'react-native-easy-grid';
 import { withNavigation } from 'react-navigation';
 import { commonStyles } from '../styles';
 
 import StorageManager from '../services/storage_manager';
 import LoadingCircle from '../components/LoadingCircle';
+import Colors from '../constants/Colors';
 
 import { getApiRestIdbyEmployee } from '../network/getApiRestIdbyEmployee';
 import { getApiServiceCallsByRestId } from '../network/getApiServiceCallsByRestId';
@@ -21,32 +24,24 @@ class ServiceCallsScreen extends Component {
     this.storageManager = new StorageManager();
   }
 
-  render() {
-    return (
-      <View style={[ commonStyles.container, commonStyles.paddingNone ]}>
-        {this.state.data !== {} && this.state.status !== 'loading' ? (
-          <Grid>
-            <Col style={commonStyles.column}>{this.state.data.map(this.renderItem)}</Col>
-          </Grid>
-        ) : (
-          <LoadingCircle />
-        )}
-      </View>
-    );
-  }
-
   async componentWillMount() {
     try {
       let user = await this.storageManager._retrieveUserData();
-      await this.setState({
-        user: user
-      });
-      const restId = await getApiRestIdbyEmployee(this.state.user.userId);
-      const orders = await getApiServiceCallsByRestId(restId);
-      this.setState({
-        data: orders || [],
-        status: 'loaded'
-      });
+      if (user) {
+        await this.setState({
+          user: user
+        });
+        const restaurant = await getApiRestIdbyEmployee(this.state.user.userId);
+
+        if (restaurant) {
+          await this.storageManager._storeRestaurantData(restaurant);
+          const calls = await getApiServiceCallsByRestId(restaurant.restaurantId);
+          this.setState({
+            data: calls || [],
+            status: 'loaded'
+          });
+        }
+      }
     } catch (err) {
       console.error(err);
       this.setState({
@@ -54,6 +49,20 @@ class ServiceCallsScreen extends Component {
         status: 'failed'
       });
     }
+  }
+
+  render() {
+    return (
+      <View style={[ commonStyles.container, { paddingTop: 20 } ]}>
+        {this.state.data !== {} && this.state.status !== 'loading' ? (
+          <ScrollView style={[ commonStyles.container, commonStyles.paddingNone ]}>
+            {this.state.data.map(this.renderItem)}
+          </ScrollView>
+        ) : (
+          <LoadingCircle />
+        )}
+      </View>
+    );
   }
 
   renderItem = (serviceCall, i) => {
@@ -66,22 +75,40 @@ class ServiceCallsScreen extends Component {
           <Grid>
             <Row style={commonStyles.rowList}>
               <Col size={6} style={[ commonStyles.columnList, commonStyles.justifyCenter ]}>
-                <Text style={commonStyles.textMedium}>{serviceCall.tableId}</Text>
-                <Text style={commonStyles.textSmall}>{serviceCall.reason}</Text>
+                <Text style={commonStyles.textMedium}>Service call ID: {serviceCall.tableId}</Text>
+                <Text style={commonStyles.textSmall}>Reason: {serviceCall.reason}</Text>
               </Col>
               <Col size={1} style={[ commonStyles.columnList, commonStyles.justifyCenter ]}>
-                <TouchableNativeFeedback
-                  onPress={async () => {
-                    // update callWaiter and CallResolve through network, thhen re-render
-                  }}
+                <View
                   style={[
-                    { width: 40, height: 40, padding: 0, margin: 0 },
+                    {
+                      backgroundColor: Colors.tintColor,
+                      width: 60,
+                      height: 60,
+                      borderRadius: 10
+                    },
                     commonStyles.centered,
                     commonStyles.justifyCenter
                   ]}
                 >
-                  <Icon name="bell" size={30} />
-                </TouchableNativeFeedback>
+                  <TouchableNativeFeedback
+                    onPress={async () => {
+                      // update orderstatus through network, then re-render
+                    }}
+                    style={[
+                      {
+                        width: 60,
+                        height: 60,
+                        padding: 10,
+                        margin: 0
+                      },
+                      commonStyles.centered,
+                      commonStyles.justifyCenter
+                    ]}
+                  >
+                    <Icon name="bell" type="font-awesome" size={30} color={Colors.white} />
+                  </TouchableNativeFeedback>
+                </View>
               </Col>
             </Row>
           </Grid>
