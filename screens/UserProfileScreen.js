@@ -36,9 +36,11 @@ export default class AppSettingsScreen extends React.Component {
 
   async componentDidMount() {
     let user = await this.storageManager._retrieveUserData();
+    console.log(JSON.stringify(user));
 
     if (user && user.userId !== null) {
       let retUser = await getApiUser(user.userId);
+      console.log(JSON.stringify(retUser));
       await this.setState({
         user: user,
         userId: retUser.userId,
@@ -255,7 +257,7 @@ export default class AppSettingsScreen extends React.Component {
               </Col>
             </Row>
             <Row>
-              <Col style={[ commonStyles.justifyCenter, commonStyles.paddingSmall ]}>
+              <Col style={commonStyles.justifyCenter}>
                 <Button
                   title={'Sign out'}
                   onPress={() => {
@@ -264,13 +266,14 @@ export default class AppSettingsScreen extends React.Component {
                   icon={{
                     name: 'sign-out',
                     type: 'font-awesome',
-                    color: Colors.white
+                    color: Colors.tintColor
                   }}
                   rounded
-                  backgroundColor={Colors.tintColor}
+                  backgroundColor={Colors.white}
+                  color={Colors.tintColor}
                 />
               </Col>
-              <Col style={[ commonStyles.justifyCenter, commonStyles.paddingSmall ]}>
+              <Col style={commonStyles.justifyCenter}>
                 <Button
                   title={'Save'.toUpperCase()}
                   onPress={() =>

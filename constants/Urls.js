@@ -5,6 +5,7 @@ export default {
   apiUsers: 'users',
   apiSignIn: 'users/signin',
   apiSignUp: 'users/signup',
+  apiOrders: 'orders',
   apiServiceCall: 'callwaiter',
 
   apiAllOrdersofRestId: (id) => {

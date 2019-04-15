@@ -12,6 +12,7 @@ import Colors from '../constants/Colors';
 
 import { getApiRestIdbyEmployee } from '../network/getApiRestIdbyEmployee';
 import { getApiAllOrdersOfRestId } from '../network/getApiAllOrdersOfRestId';
+import { putApiOrder } from '../network/putApiOrder';
 
 class OrdersScreen extends Component {
   constructor() {
@@ -19,6 +20,7 @@ class OrdersScreen extends Component {
     this.state = {
       status: 'loading',
       data: [],
+      restaurant: null,
       user: null
     };
     this.storageManager = new StorageManager();
@@ -38,7 +40,8 @@ class OrdersScreen extends Component {
           const orders = await getApiAllOrdersOfRestId(restaurant.restaurantId);
           this.setState({
             data: orders || [],
-            status: 'loaded'
+            status: 'loaded',
+            restaurant: restaurant
           });
         }
       }
@@ -94,7 +97,15 @@ class OrdersScreen extends Component {
               >
                 <TouchableNativeFeedback
                   onPress={async () => {
-                    // update orderstatus through network, then re-render
+                    let newOrder = Object.assign(order);
+                    console.log(newOrder);
+                    newOrder.orderStatus++;
+                    console.log(newOrder);
+                    await putApiOrder(newOrder);
+                    const orders = await getApiAllOrdersOfRestId(this.state.restaurant.restaurantId);
+                    this.setState({
+                      data: orders || []
+                    });
                   }}
                   style={[
                     {
