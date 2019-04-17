@@ -29,6 +29,11 @@ export default class App extends React.Component {
       console.log('_retrievePaymentMethodData', await this.storageManager._retrievePaymentMethodData());
     }
     this.setState({ user: await this.storageManager._retrieveUserData() });
+
+    setInterval(async () => {
+      let user = await this.storageManager._retrieveUserData();
+      this.setState({ user });
+    }, 3000);
   }
 
   render() {
