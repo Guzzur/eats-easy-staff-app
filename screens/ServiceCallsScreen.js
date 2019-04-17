@@ -9,6 +9,8 @@ import { commonStyles } from '../styles';
 import StorageManager from '../services/storage_manager';
 import LoadingCircle from '../components/LoadingCircle';
 import Colors from '../constants/Colors';
+import urls from '../constants/Urls';
+import WSConnector from '../network/WSConnector';
 
 import { getApiRestIdbyEmployee } from '../network/getApiRestIdbyEmployee';
 import { getApiServiceCallsByRestId } from '../network/getApiServiceCallsByRestId';
@@ -23,7 +25,19 @@ class ServiceCallsScreen extends Component {
       user: null
     };
     this.storageManager = new StorageManager();
+    this.newServiceCallSocket = new WSConnector(urls.wsRootUrl, null, urls.wsNewServiceCall);
+
+    this.newServiceCallSocket.listen(this.onNewServiceCallReceived);
     this.handleCall = this.handleCall.bind(this);
+  }
+
+  async onNewServiceCallReceived(serviceCall) {
+    try {
+      let serviceCallParsed = JSON.parse(serviceCall);
+      this.setState({ data: { serviceCallParsed, ...this.state.data } });
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   async componentWillMount() {

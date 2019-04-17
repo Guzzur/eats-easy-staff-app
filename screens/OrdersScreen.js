@@ -9,6 +9,8 @@ import { commonStyles } from '../styles';
 import StorageManager from '../services/storage_manager';
 import LoadingCircle from '../components/LoadingCircle';
 import Colors from '../constants/Colors';
+import urls from '../constants/Urls';
+import WSConnector from '../network/WSConnector';
 
 import { getApiRestIdbyEmployee } from '../network/getApiRestIdbyEmployee';
 import { getApiAllOrdersOfRestId } from '../network/getApiAllOrdersOfRestId';
@@ -24,6 +26,18 @@ class OrdersScreen extends Component {
       user: null
     };
     this.storageManager = new StorageManager();
+    this.newOrderSocket = new WSConnector(urls.wsRootUrl, null, urls.wsNewOrder);
+
+    this.newOrderSocket.listen(this.onNewOrderReceived);
+  }
+
+  async onNewOrderReceived(order) {
+    try {
+      let orderParsed = JSON.parse(order);
+      this.setState({ data: { orderParsed, ...this.state.data } });
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   async componentWillMount() {
@@ -69,7 +83,7 @@ class OrdersScreen extends Component {
   }
 
   renderItem = (order, i) => {
-    return order ? (
+    return order && order.orderStatus < 6 ? (
       <View
         key={'order_' + i}
         style={[ commonStyles.container, commonStyles.shadowSmall, { height: 100, marginBottom: 5 } ]}
