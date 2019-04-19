@@ -318,7 +318,10 @@ export default class AppSettingsScreen extends React.Component {
         )}
         <SignInDialog
           visible={this.state.signInVisible}
-          cancel={() => this.setState({ signInVisible: false })}
+          cancel={async () => {
+            let user = await this.storageManager._retrieveUserData();
+            this.setState({ signInVisible: false, user });
+          }}
           signUpActionHandler={() => {
             this.setState({ signInVisible: false, signUpVisible: true });
           }}

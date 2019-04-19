@@ -1,6 +1,6 @@
 export default {
   apiRootUrl: 'https://eats-easy-spring.herokuapp.com/api/',
-  // apiRootUrl: 'http://localhost:8080/api/',
+  // apiRootUrl: 'http://192.168.2.140:8080/api/',
   apiVersionUrl: 'whoami',
   apiUsers: 'users',
   apiSignIn: 'users/signin',
@@ -17,8 +17,8 @@ export default {
   apiRestIdbyEmployee: (userId) => {
     return 'restaurants/' + userId + '/employee';
   },
-  // wsRootUrl: 'wss://eats-easy-spring.herokuapp.com/socket/websocket/',
-  wsRootUrl: 'ws://localhost:8080/socket/websocket/',
+  wsRootUrl: 'wss://eats-easy-spring.herokuapp.com/socket/websocket/',
+  // wsRootUrl: 'ws://192.168.2.140:8080/socket/websocket/',
   wsNewOrder: 'orders/new',
   wsNewServiceCall: 'callwaiter/new',
   wsOrdersStatusUpdate: 'orders/statusUpdate'
