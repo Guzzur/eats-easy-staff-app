@@ -10,7 +10,7 @@ import StorageManager from '../services/storage_manager';
 import LoadingCircle from '../components/LoadingCircle';
 import Colors from '../constants/Colors';
 import urls from '../constants/Urls';
-import WSConnector from '../network/WSConnector';
+import WSConnector from '../network/WsConnector';
 
 import { getApiRestIdbyEmployee } from '../network/getApiRestIdbyEmployee';
 import { getApiServiceCallsByRestId } from '../network/getApiServiceCallsByRestId';

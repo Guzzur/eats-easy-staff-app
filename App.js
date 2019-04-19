@@ -13,6 +13,7 @@ export default class App extends React.Component {
       isLoadingComplete: false,
       user: null
     };
+    console.disableYellowBox = true;
     this.storageManager = new StorageManager();
   }
 

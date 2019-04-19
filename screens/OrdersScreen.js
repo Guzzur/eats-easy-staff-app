@@ -10,7 +10,8 @@ import StorageManager from '../services/storage_manager';
 import LoadingCircle from '../components/LoadingCircle';
 import Colors from '../constants/Colors';
 import urls from '../constants/Urls';
-import WSConnector from '../network/WSConnector';
+// import WSConnector from '../network/WsConnector';
+import StompWsConnector from '../network/StompWsConnector';
 
 import { getApiRestIdbyEmployee } from '../network/getApiRestIdbyEmployee';
 import { getApiAllOrdersOfRestId } from '../network/getApiAllOrdersOfRestId';
@@ -26,14 +27,17 @@ class OrdersScreen extends Component {
       user: null
     };
     this.storageManager = new StorageManager();
-    this.newOrderSocket = new WSConnector(urls.wsRootUrl, null, urls.wsNewOrder);
+    // this.newOrderSocket = new WSConnector(urls.wsRootUrl, null, urls.wsNewOrder);
 
-    this.newOrderSocket.listen(this.onNewOrderReceived);
+    // this.newOrderSocket.listen(this.onNewOrderReceived);
   }
 
   async onNewOrderReceived(order) {
     try {
+      console.log('Received message on WebSocket');
+      console.log(order);
       let orderParsed = JSON.parse(order);
+      console.log(orderParsed);
       this.setState({ data: { orderParsed, ...this.state.data } });
     } catch (err) {
       console.error(err);
@@ -138,6 +142,7 @@ class OrdersScreen extends Component {
             </Col>
           </Row>
         </Grid>
+        <StompWsConnector onMessage={this.onNewOrderReceived} />
       </View>
     ) : (
       <View key={'no_order_' + i} />
