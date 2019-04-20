@@ -139,10 +139,14 @@ class OrdersScreen extends Component {
                     newOrder.orderStatus++;
                     console.log(newOrder);
                     await putApiOrder(newOrder);
-                    const orders = await getApiAllOrdersOfRestId(this.state.restaurant.restaurantId);
-                    this.setState({
-                      data: orders || []
-                    });
+
+                    let orders = await getApiAllOrdersOfRestId(this.state.restaurant.restaurantId);
+                    let sortedOrders =
+                      orders &&
+                      orders.length &&
+                      (await orders.sort((a, b) => (a.orderId > b.orderId ? -1 : b.orderId > a.orderId ? 1 : 0)));
+
+                    this.setState({ data: sortedOrders || [] });
                   }}
                   style={[
                     {
