@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Text, View, ScrollView, ListView, TouchableNativeFeedback } from 'react-native';
+import { Text, View, ScrollView, TouchableNativeFeedback } from 'react-native';
 import { Icon } from 'react-native-elements';
 
 import { Col, Row, Grid } from 'react-native-easy-grid';
@@ -8,9 +8,10 @@ import { commonStyles } from '../styles';
 
 import StorageManager from '../services/storage_manager';
 import LoadingCircle from '../components/LoadingCircle';
+import { Snackbar } from 'react-native-material-ui';
 import Colors from '../constants/Colors';
-import urls from '../constants/Urls';
-import WSConnector from '../network/WsConnector';
+// import urls from '../constants/Urls';
+// import WSConnector from '../network/WsConnector';
 
 import { getApiRestIdbyEmployee } from '../network/getApiRestIdbyEmployee';
 import { getApiServiceCallsByRestId } from '../network/getApiServiceCallsByRestId';
@@ -22,22 +23,12 @@ class ServiceCallsScreen extends Component {
     this.state = {
       status: 'loading',
       data: [],
-      user: null
+      user: null,
+      snackVisible: false
     };
     this.storageManager = new StorageManager();
-    this.newServiceCallSocket = new WSConnector(urls.wsRootUrl, null, urls.wsNewServiceCall);
-
-    this.newServiceCallSocket.listen(this.onNewServiceCallReceived);
+    // this.onStompWsMessage = this.onStompWsMessage.bind(this);
     this.handleCall = this.handleCall.bind(this);
-  }
-
-  async onNewServiceCallReceived(serviceCall) {
-    try {
-      let serviceCallParsed = JSON.parse(serviceCall);
-      this.setState({ data: { serviceCallParsed, ...this.state.data } });
-    } catch (err) {
-      console.error(err);
-    }
   }
 
   async componentWillMount() {
@@ -52,9 +43,14 @@ class ServiceCallsScreen extends Component {
         if (restaurant) {
           await this.storageManager._storeRestaurantData(restaurant);
           const calls = await getApiServiceCallsByRestId(restaurant.restaurantId);
+          let sortedCalls =
+            calls &&
+            calls.length &&
+            (await calls.sort((a, b) => (a.callId > b.callId ? -1 : b.callId > a.callId ? 1 : 0)));
           this.setState({
-            data: calls || [],
-            status: 'loaded'
+            data: sortedCalls || [],
+            status: 'loaded',
+            restaurant: restaurant
           });
         }
       }
@@ -65,6 +61,29 @@ class ServiceCallsScreen extends Component {
         status: 'failed'
       });
     }
+  }
+
+  componentDidMount() {
+    this.setState({
+      intervalId: setInterval(async () => {
+        let calls = await getApiServiceCallsByRestId(this.state.restaurant.restaurantId);
+        let sortedCalls =
+          calls &&
+          calls.length &&
+          (await calls.sort((a, b) => (a.callId > b.callId ? -1 : b.callId > a.callId ? 1 : 0)));
+        if (sortedCalls.length !== this.state.data.length) {
+          console.log('Got new service call!');
+          this.setState({ snackVisible: true, data: sortedCalls || [] });
+          setTimeout(() => {
+            this.setState({ snackVisible: false });
+          }, 1000);
+        }
+      }, 10000)
+    });
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.state.intervalId);
   }
 
   async handleCall(id) {
@@ -79,6 +98,11 @@ class ServiceCallsScreen extends Component {
   render() {
     return (
       <View style={[ commonStyles.container, { paddingTop: 20 } ]}>
+        <Snackbar
+          visible={this.state.snackVisible}
+          message="New service call has arrived!"
+          onRequestClose={() => this.setState({ snackVisible: false })}
+        />
         {this.state.data !== {} && this.state.data.length !== 0 && this.state.status !== 'loading' ? (
           <ScrollView>
             {this.state.data.map(this.renderItem)
@@ -146,6 +170,19 @@ class ServiceCallsScreen extends Component {
       <View key={'no_call_' + i} />
     );
   };
+
+  //  async onStompWsMessage(message) {
+  //   try {
+  //     console.log('Received message on ServiceCallsScreen WebSocket');
+  //     console.log(message);
+  //     if (message && message.type && message.type === 'callWaiter') {
+  //       const calls = await getApiAllOrdersOfRestId(this.state.restaurant.restaurantId);
+  //       this.setState({ data: calls || [] });
+  //     }
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // }
 }
 
 //do we need this?

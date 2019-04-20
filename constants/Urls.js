@@ -1,6 +1,6 @@
 export default {
-  apiRootUrl: 'https://eats-easy-spring.herokuapp.com/api/',
-  // apiRootUrl: 'http://192.168.2.140:8080/api/',
+  // apiRootUrl: 'https://eats-easy-spring.herokuapp.com/api/',
+  apiRootUrl: 'http://192.168.2.140:8080/api/',
   apiVersionUrl: 'whoami',
   apiUsers: 'users',
   apiSignIn: 'users/signin',
@@ -17,8 +17,8 @@ export default {
   apiRestIdbyEmployee: (userId) => {
     return 'restaurants/' + userId + '/employee';
   },
-  wsRootUrl: 'https://eats-easy-spring.herokuapp.com/stomp'
-  // wsRootUrl: 'http://192.168.2.140:8080/stomp',
+  // wsRootUrl: 'https://eats-easy-spring.herokuapp.com/stomp'
+  wsRootUrl: 'http://192.168.2.140:8080/stomp'
 
   // wsNewOrder: 'orders/new',
   // wsNewServiceCall: 'callwaiter/new',

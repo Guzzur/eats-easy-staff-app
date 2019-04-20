@@ -8,13 +8,13 @@ import { commonStyles } from '../styles';
 
 import StorageManager from '../services/storage_manager';
 import LoadingCircle from '../components/LoadingCircle';
+import { Snackbar } from 'react-native-material-ui';
 import Colors from '../constants/Colors';
-import urls from '../constants/Urls';
-// import WSConnector from '../network/WsConnector';
-import StompWsConnector from '../network/StompWsConnector';
+// import StompWsConnector from '../network/StompWsConnector';
 
 import { getApiRestIdbyEmployee } from '../network/getApiRestIdbyEmployee';
 import { getApiAllOrdersOfRestId } from '../network/getApiAllOrdersOfRestId';
+// import { getApiOrderByOrderId } from '../network/getApiOrderByOrderId';
 import { putApiOrder } from '../network/putApiOrder';
 
 class OrdersScreen extends Component {
@@ -24,24 +24,11 @@ class OrdersScreen extends Component {
       status: 'loading',
       data: [],
       restaurant: null,
-      user: null
+      user: null,
+      snackVisible: false
     };
     this.storageManager = new StorageManager();
-    // this.newOrderSocket = new WSConnector(urls.wsRootUrl, null, urls.wsNewOrder);
-
-    // this.newOrderSocket.listen(this.onNewOrderReceived);
-  }
-
-  async onNewOrderReceived(order) {
-    try {
-      console.log('Received message on WebSocket');
-      console.log(order);
-      let orderParsed = JSON.parse(order);
-      console.log(orderParsed);
-      this.setState({ data: { orderParsed, ...this.state.data } });
-    } catch (err) {
-      console.error(err);
-    }
+    // this.onStompWsMessage = this.onStompWsMessage.bind(this);
   }
 
   async componentWillMount() {
@@ -55,9 +42,13 @@ class OrdersScreen extends Component {
 
         if (restaurant) {
           await this.storageManager._storeRestaurantData(restaurant);
-          const orders = await getApiAllOrdersOfRestId(restaurant.restaurantId);
+          let orders = await getApiAllOrdersOfRestId(restaurant.restaurantId);
+          let sortedOrders =
+            orders &&
+            orders.length &&
+            (await orders.sort((a, b) => (a.orderId > b.orderId ? -1 : b.orderId > a.orderId ? 1 : 0)));
           this.setState({
-            data: orders || [],
+            data: sortedOrders || [],
             status: 'loaded',
             restaurant: restaurant
           });
@@ -72,9 +63,37 @@ class OrdersScreen extends Component {
     }
   }
 
+  componentDidMount() {
+    this.setState({
+      intervalId: setInterval(async () => {
+        let orders = await getApiAllOrdersOfRestId(this.state.restaurant.restaurantId);
+        let sortedOrders =
+          orders &&
+          orders.length &&
+          (await orders.sort((a, b) => (a.orderId > b.orderId ? -1 : b.orderId > a.orderId ? 1 : 0)));
+        if (sortedOrders.length !== this.state.data.length) {
+          console.log('Got new order!');
+          this.setState({ snackVisible: true, data: sortedOrders || [] });
+          setTimeout(() => {
+            this.setState({ snackVisible: false });
+          }, 1000);
+        }
+      }, 10000)
+    });
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.state.intervalId);
+  }
+
   render() {
     return (
       <View style={[ commonStyles.container, { paddingTop: 20 } ]}>
+        <Snackbar
+          visible={this.state.snackVisible}
+          message="New ordew has arrived!"
+          onRequestClose={() => this.setState({ snackVisible: false })}
+        />
         {this.state.data !== {} && this.state.status !== 'loading' ? (
           <ScrollView style={[ commonStyles.container, commonStyles.paddingNone ]}>
             {this.state.data.map(this.renderItem)}
@@ -142,12 +161,46 @@ class OrdersScreen extends Component {
             </Col>
           </Row>
         </Grid>
-        <StompWsConnector onMessage={this.onNewOrderReceived} />
+        {/* <StompWsConnector onMessage={this.onStompWsMessage} /> */}
       </View>
     ) : (
       <View key={'no_order_' + i} />
     );
   };
+
+  // async onStompWsMessage(message) {
+  //   try {
+  //     console.log('### 0 ###', 'Received message on OrdersScreen WebSocket');
+  //     console.log('### 1 ###', message);
+
+  //     if (message && message.type && message.type === 'order' && message.orderId) {
+  //       var result = await this.state.data.find((item) => item.orderId === message.orderId);
+  //       console.log('### 2 ###', result);
+
+  //       if (result === undefined) {
+  //         let order = await getApiOrderByOrderId(message.orderId);
+  //         console.log('### 3 ###', order);
+
+  //         let orders = [ order, ...this.state.data ];
+  //         let sortedOrders = await orders.sort((a, b) => (a.orderId > b.orderId ? -1 : b.orderId > a.orderId ? 1 : 0));
+
+  //         console.log('### 4 ###', 'Adding to state', order);
+
+  //         if (!this._isMounted) {
+  //           console.log('### 5 ###', 'onStompWsMessage while unmounted');
+  //           return;
+  //         }
+
+  //         this.setState({ snackVisible: true, data: sortedOrders || [] });
+  //         setTimeout(() => {
+  //           this.setState({ snackVisible: false });
+  //         }, 1000);
+  //       } else console.log('### 6 ###', 'Got existing orderId from Socket');
+  //     }
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // }
 }
 
 //do we need this?

@@ -18,11 +18,11 @@ export default class StompWsConnector extends React.Component {
         <SockJsClient
           url={Urls.wsRootUrl}
           topics={[ '/topic/all' ]}
-          onMessage={this.props.onMessage}
+          onMessage={async (msg) => await this.props.onMessage(msg)}
           ref={(client) => {
             this.clientRef = client;
           }}
-          debug={true}
+          debug={false}
         />
       </View>
     );
