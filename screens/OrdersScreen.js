@@ -14,6 +14,9 @@ import Colors from '../constants/Colors';
 
 import { getApiRestIdbyEmployee } from '../network/getApiRestIdbyEmployee';
 import { getApiAllOrdersOfRestId } from '../network/getApiAllOrdersOfRestId';
+import { getApiOrderItems } from '../network/getApiOrderItems';
+import { getApiDishByDishId } from '../network/getApiDishByDishId';
+// import { getApiOrderItemsByOrderId } from '../network/getApiOrderItemsByOrderId';
 // import { getApiOrderByOrderId } from '../network/getApiOrderByOrderId';
 import { putApiOrder } from '../network/putApiOrder';
 
@@ -23,11 +26,15 @@ class OrdersScreen extends Component {
     this.state = {
       status: 'loading',
       data: [],
+      statuses: [ 'Order placed', 'Preparing', 'Cooking', 'Serving', 'Completed' ],
+      orderItems: [],
+      orderItemsNamesMap: [],
       restaurant: null,
       user: null,
       snackVisible: false
     };
     this.storageManager = new StorageManager();
+    this.updateOrdersData = this.updateOrdersData.bind(this);
     // this.onStompWsMessage = this.onStompWsMessage.bind(this);
   }
 
@@ -43,12 +50,10 @@ class OrdersScreen extends Component {
         if (restaurant) {
           await this.storageManager._storeRestaurantData(restaurant);
           let orders = await getApiAllOrdersOfRestId(restaurant.restaurantId);
-          let sortedOrders =
-            orders &&
-            orders.length &&
-            (await orders.sort((a, b) => (a.orderId > b.orderId ? -1 : b.orderId > a.orderId ? 1 : 0)));
+
+          await this.updateOrdersData(orders);
+
           this.setState({
-            data: sortedOrders || [],
             status: 'loaded',
             restaurant: restaurant
           });
@@ -66,19 +71,55 @@ class OrdersScreen extends Component {
   componentDidMount() {
     this.setState({
       intervalId: setInterval(async () => {
+        if (!this.state.restaurant) {
+          const restaurant = await getApiRestIdbyEmployee(this.state.user.userId);
+
+          if (!restaurant) return;
+          this.setState({ restaurant });
+        }
+
         let orders = await getApiAllOrdersOfRestId(this.state.restaurant.restaurantId);
-        let sortedOrders =
-          orders &&
-          orders.length &&
-          (await orders.sort((a, b) => (a.orderId > b.orderId ? -1 : b.orderId > a.orderId ? 1 : 0)));
-        if (sortedOrders.length !== this.state.data.length) {
-          console.log('Got new order!');
-          this.setState({ snackVisible: true, data: sortedOrders || [] });
+
+        if (orders.length !== this.state.data.length) {
+          await this.updateOrdersData(orders);
+
+          this.setState({ snackVisible: true });
           setTimeout(() => {
             this.setState({ snackVisible: false });
-          }, 1000);
+          }, 8000);
         }
       }, 10000)
+    });
+  }
+
+  async updateOrdersData(orders) {
+    let orderItemsApi = await getApiOrderItems();
+    let orderItems = [];
+    let orderItemsNamesMap = [];
+
+    for (var order of orders) {
+      for (var orderItem of orderItemsApi) {
+        if (orderItems[order.orderId] === undefined) orderItems[order.orderId] = [];
+        if (order.orderId === orderItem.orderId) {
+          if (orderItemsNamesMap[orderItem.dishId] === undefined) {
+            dish = await getApiDishByDishId(orderItem.dishId);
+            orderItemsNamesMap[orderItem.dishId] = dish.dishName;
+          }
+          orderItem.dishName = orderItemsNamesMap[orderItem.dishId];
+          orderItems[order.orderId].push(orderItem);
+        }
+      }
+    }
+
+    let sortedOrders =
+      orders &&
+      orders.length &&
+      (await orders.sort((a, b) => (a.orderId > b.orderId ? -1 : b.orderId > a.orderId ? 1 : 0)));
+
+    this.setState({
+      data: sortedOrders || [],
+      orderItems: orderItems,
+      orderItemsNamesMap: orderItemsNamesMap
     });
   }
 
@@ -96,7 +137,7 @@ class OrdersScreen extends Component {
         />
         {this.state.data !== {} && this.state.status !== 'loading' ? (
           <ScrollView style={[ commonStyles.container, commonStyles.paddingNone ]}>
-            {this.state.data.map(this.renderItem)}
+            {this.state.data.map(this.renderOrder)}
           </ScrollView>
         ) : (
           <LoadingCircle />
@@ -105,70 +146,88 @@ class OrdersScreen extends Component {
     );
   }
 
-  renderItem = (order, i) => {
-    return order && order.orderStatus < 6 ? (
-      <View
-        key={'order_' + i}
-        style={[ commonStyles.container, commonStyles.shadowSmall, { height: 100, marginBottom: 5 } ]}
-      >
-        <Grid>
-          <Row style={commonStyles.rowList}>
-            <Col size={6} style={[ commonStyles.columnList, commonStyles.justifyCenter ]}>
-              <Text style={commonStyles.textBig}>Order ID: {order.orderId}</Text>
-              <Text style={commonStyles.textSmall}>Time received: {order.timeReceived}</Text>
-              <Text style={commonStyles.textSmall}>Table ID: {order.tableId}</Text>
-              <Text style={commonStyles.textSmall}>Order Status: {order.orderStatus}</Text>
-            </Col>
-            <Col size={1} style={[ commonStyles.columnList, commonStyles.justifyCenter ]}>
-              <View
-                style={[
-                  {
-                    backgroundColor: Colors.tintColor,
-                    width: 60,
-                    height: 60,
-                    borderRadius: 10
-                  },
-                  commonStyles.centered,
-                  commonStyles.justifyCenter
-                ]}
-              >
-                <TouchableNativeFeedback
-                  onPress={async () => {
-                    let newOrder = Object.assign(order);
-                    console.log(newOrder);
-                    newOrder.orderStatus++;
-                    console.log(newOrder);
-                    await putApiOrder(newOrder);
-
-                    let orders = await getApiAllOrdersOfRestId(this.state.restaurant.restaurantId);
-                    let sortedOrders =
-                      orders &&
-                      orders.length &&
-                      (await orders.sort((a, b) => (a.orderId > b.orderId ? -1 : b.orderId > a.orderId ? 1 : 0)));
-
-                    this.setState({ data: sortedOrders || [] });
-                  }}
+  renderOrder = (order, i) => {
+    if (order && order.orderId && order.orderStatus < 6) {
+      return (
+        <View key={'order_' + i} style={[ commonStyles.container, commonStyles.shadowSmall, { marginBottom: 5 } ]}>
+          <Grid>
+            <Row style={commonStyles.rowList}>
+              <Col size={6} style={[ commonStyles.columnList, commonStyles.justifyCenter ]}>
+                <Text style={commonStyles.textBig}>Order ID: {order.orderId}</Text>
+                <Text style={commonStyles.textSmall}>Time received: {order.timeReceived}</Text>
+                <Text style={commonStyles.textSmall}>Table ID: {order.tableId}</Text>
+                <Text style={commonStyles.textSmall}>
+                  Order status: {this.state.statuses[(order.orderStatus - 1) % this.state.statuses.length]}
+                </Text>
+                {this.state.orderItems[order.orderId].map(this.renderOrderDetails)}
+              </Col>
+              <Col size={1} style={[ commonStyles.columnList, commonStyles.justifyCenter ]}>
+                <View
                   style={[
                     {
+                      backgroundColor: Colors.tintColor,
                       width: 60,
                       height: 60,
-                      padding: 10,
-                      margin: 0
+                      borderRadius: 10
                     },
                     commonStyles.centered,
                     commonStyles.justifyCenter
                   ]}
                 >
-                  <Icon name="bell" type="font-awesome" size={30} color={Colors.white} />
-                </TouchableNativeFeedback>
-              </View>
-            </Col>
-          </Row>
-        </Grid>
-        {/* <StompWsConnector onMessage={this.onStompWsMessage} /> */}
+                  <TouchableNativeFeedback
+                    onPress={async () => {
+                      let newOrder = Object.assign(order);
+                      console.log(newOrder);
+                      newOrder.orderStatus++;
+                      console.log(newOrder);
+                      await putApiOrder(newOrder);
+
+                      let orders = await getApiAllOrdersOfRestId(this.state.restaurant.restaurantId);
+                      let sortedOrders =
+                        orders &&
+                        orders.length &&
+                        (await orders.sort((a, b) => (a.orderId > b.orderId ? -1 : b.orderId > a.orderId ? 1 : 0)));
+
+                      this.setState({ data: sortedOrders || [] });
+                    }}
+                    style={[
+                      {
+                        width: 60,
+                        height: 60,
+                        padding: 10,
+                        margin: 0
+                      },
+                      commonStyles.centered,
+                      commonStyles.justifyCenter
+                    ]}
+                  >
+                    <Icon name="bell" type="font-awesome" size={30} color={Colors.white} />
+                  </TouchableNativeFeedback>
+                </View>
+              </Col>
+            </Row>
+          </Grid>
+          {/* <StompWsConnector onMessage={this.onStompWsMessage} /> */}
+        </View>
+      );
+    } else return <View key={'no_order_' + i} />;
+  };
+
+  // orderDetails = async (orderId) => {
+  //   try {
+  //     let orderItems = await getApiOrderItemsByOrderId(orderId);
+  //     console.log(orderItems);
+  //     return orderItems && orderItems.length > 0 ? orderItems.map(this.renderOrderDetails) : <View />;
+  //   } catch (err) {
+  //     console.error(err);
+  //   }
+  // };
+
+  renderOrderDetails = (item, i) => {
+    return (
+      <View key={'order_' + item.orderId + '_item_' + i}>
+        <Text style={[ commonStyles.textSmall, { paddingLeft: 20 } ]}>+ {item.dishName}</Text>
       </View>
-    ) : (
-      <View key={'no_order_' + i} />
     );
   };
 
