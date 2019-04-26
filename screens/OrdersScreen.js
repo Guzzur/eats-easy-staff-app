@@ -14,8 +14,10 @@ import Colors from '../constants/Colors';
 
 import { getApiRestIdbyEmployee } from '../network/getApiRestIdbyEmployee';
 import { getApiAllOrdersOfRestId } from '../network/getApiAllOrdersOfRestId';
+import { getApiPayments } from '../network/getApiPayments';
 import { getApiOrderItems } from '../network/getApiOrderItems';
 import { getApiDishByDishId } from '../network/getApiDishByDishId';
+
 // import { getApiOrderItemsByOrderId } from '../network/getApiOrderItemsByOrderId';
 // import { getApiOrderByOrderId } from '../network/getApiOrderByOrderId';
 import { putApiOrder } from '../network/putApiOrder';
@@ -94,19 +96,28 @@ class OrdersScreen extends Component {
 
   async updateOrdersData(orders) {
     let orderItemsApi = await getApiOrderItems();
+    let payments = await getApiPayments();
     let orderItems = [];
     let orderItemsNamesMap = [];
 
     for (var order of orders) {
       for (var orderItem of orderItemsApi) {
         if (orderItems[order.orderId] === undefined) orderItems[order.orderId] = [];
+        if (order.total === undefined) order.total = 0;
         if (order.orderId === orderItem.orderId) {
+          order.total += orderItem.subtotal;
           if (orderItemsNamesMap[orderItem.dishId] === undefined) {
             dish = await getApiDishByDishId(orderItem.dishId);
             orderItemsNamesMap[orderItem.dishId] = dish.dishName;
           }
           orderItem.dishName = orderItemsNamesMap[orderItem.dishId];
           orderItems[order.orderId].push(orderItem);
+        }
+      }
+      for (var payment of payments) {
+        if (order.amount === undefined) order.amount = 0;
+        if (order.orderId === payment.orderId) {
+          order.amount += payment.amount;
         }
       }
     }
@@ -136,9 +147,30 @@ class OrdersScreen extends Component {
           onRequestClose={() => this.setState({ snackVisible: false })}
         />
         {this.state.data !== {} && this.state.status !== 'loading' ? (
-          <ScrollView style={[ commonStyles.container, commonStyles.paddingNone ]}>
-            {this.state.data.map(this.renderOrder)}
-          </ScrollView>
+          <View style={commonStyles.container}>
+            <ScrollView style={[ commonStyles.flexed, commonStyles.container, commonStyles.paddingNone ]}>
+              {this.state.data.map(this.renderOrder)}
+            </ScrollView>
+            <View style={{ height: 60, padding: 10 }}>
+              <Grid>
+                <Row>
+                  <Col size={1} style={[ commonStyles.justifyCenter, commonStyles.centered ]}>
+                    <Icon
+                      raised
+                      name="refresh"
+                      type="font-awesome"
+                      size={20}
+                      color={Colors.black}
+                      onPress={async () => {
+                        let orders = await getApiAllOrdersOfRestId(this.state.restaurant.restaurantId);
+                        await this.updateOrdersData(orders);
+                      }}
+                    />
+                  </Col>
+                </Row>
+              </Grid>
+            </View>
+          </View>
         ) : (
           <LoadingCircle />
         )}
@@ -160,6 +192,9 @@ class OrdersScreen extends Component {
                   Order status: {this.state.statuses[(order.orderStatus - 1) % this.state.statuses.length]}
                 </Text>
                 {this.state.orderItems[order.orderId].map(this.renderOrderDetails)}
+                <Text style={commonStyles.textSmall}>
+                  Payed: {order.amount}/{order.total} NIS
+                </Text>
               </Col>
               <Col size={1} style={[ commonStyles.columnList, commonStyles.justifyCenter ]}>
                 <View
@@ -183,12 +218,7 @@ class OrdersScreen extends Component {
                       await putApiOrder(newOrder);
 
                       let orders = await getApiAllOrdersOfRestId(this.state.restaurant.restaurantId);
-                      let sortedOrders =
-                        orders &&
-                        orders.length &&
-                        (await orders.sort((a, b) => (a.orderId > b.orderId ? -1 : b.orderId > a.orderId ? 1 : 0)));
-
-                      this.setState({ data: sortedOrders || [] });
+                      this.updateOrdersData(orders);
                     }}
                     style={[
                       {
@@ -212,16 +242,6 @@ class OrdersScreen extends Component {
       );
     } else return <View key={'no_order_' + i} />;
   };
-
-  // orderDetails = async (orderId) => {
-  //   try {
-  //     let orderItems = await getApiOrderItemsByOrderId(orderId);
-  //     console.log(orderItems);
-  //     return orderItems && orderItems.length > 0 ? orderItems.map(this.renderOrderDetails) : <View />;
-  //   } catch (err) {
-  //     console.error(err);
-  //   }
-  // };
 
   renderOrderDetails = (item, i) => {
     return (

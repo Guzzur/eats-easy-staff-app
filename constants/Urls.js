@@ -7,6 +7,7 @@ export default {
   apiSignUp: 'users/signup',
   apiDishes: 'dishes',
   apiOrders: 'orders',
+  apiPayments: 'payments',
   apiOrderItems: 'orderitems',
   apiServiceCall: 'callwaiter',
 

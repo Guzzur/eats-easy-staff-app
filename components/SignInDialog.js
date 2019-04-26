@@ -109,7 +109,7 @@ export default class SignInDialog extends React.Component {
             />
           </DialogFooter>
         }
-        width={400}
+        width={300}
       >
         <DialogContent>
           <TextInput
