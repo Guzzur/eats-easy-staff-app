@@ -14,9 +14,14 @@ export default class SignInScreen extends React.Component {
     this.state = {
       user: null,
       signInVisible: false,
-      signUpVisible: false
+      signUpVisible: false,
+      mounted: true
     };
     this.storageManager = new StorageManager();
+  }
+
+  componentWillUnmount() {
+    this.setState({ mounted: false });
   }
 
   render() {
@@ -26,7 +31,7 @@ export default class SignInScreen extends React.Component {
           <Button
             title={'Sign in'.toUpperCase()}
             onPress={() => {
-              this.setState({ signInVisible: true });
+              if (this.state.mounted) this.setState({ signInVisible: true });
             }}
             icon={{
               name: 'sign-in',
@@ -42,10 +47,10 @@ export default class SignInScreen extends React.Component {
           visible={this.state.signInVisible}
           cancel={async () => {
             let user = await this.storageManager._retrieveUserData();
-            this.setState({ signInVisible: false, user });
+            if (this.state.mounted) this.setState({ signInVisible: false, user });
           }}
           signUpActionHandler={() => {
-            this.setState({ signInVisible: false, signUpVisible: true });
+            if (this.state.mounted) this.setState({ signInVisible: false, signUpVisible: true });
           }}
         />
         <SignUpDialog visible={this.state.signUpVisible} cancel={() => this.setState({ signUpVisible: false })} />

@@ -193,7 +193,7 @@ class OrdersScreen extends Component {
                 </Text>
                 {this.state.orderItems[order.orderId].map(this.renderOrderDetails)}
                 <Text style={commonStyles.textSmall}>
-                  Payed: {order.amount}/{order.total} NIS
+                  Payed: {order.amount.toFixed(2)}/{order.total.toFixed(2)} NIS
                 </Text>
               </Col>
               <Col size={1} style={[ commonStyles.columnList, commonStyles.justifyCenter ]}>
